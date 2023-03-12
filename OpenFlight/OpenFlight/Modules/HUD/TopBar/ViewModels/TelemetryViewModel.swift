@@ -45,6 +45,8 @@ final class TelemetryState: ViewModelState {
     fileprivate(set) var speed = Observable(TelemetryValueModel())
     /// Observable for current altitude.
     fileprivate(set) var altitude = Observable(TelemetryValueModel())
+    /// Observable for current altitude.
+    fileprivate(set) var groundRelativeAltitude = Observable(TelemetryValueModel())
     /// Observable for current distance.
     fileprivate(set) var distance = Observable(TelemetryValueModel())
 }
@@ -98,6 +100,7 @@ final class TelemetryViewModel: DroneWatcherViewModel<TelemetryState> {
     init(userLocationManager: LocationManager,
          speedDidChange: ((TelemetryValueModel) -> Void)? = nil,
          altitudeDidChange: ((TelemetryValueModel) -> Void)? = nil,
+         groundRelativeAltitudeDidChange: ((TelemetryValueModel) -> Void)? = nil,
          distanceDidChange: ((TelemetryValueModel) -> Void)? = nil) {
         self.userLocationManager = userLocationManager
         super.init()
@@ -130,6 +133,7 @@ private extension TelemetryViewModel {
         altimeterRef = drone.getInstrument(Instruments.altimeter) { [unowned self] _ in
             computeSpeed()
             computeAltitude()
+            computeGroundRelativeAltitude()
         }
     }
 
@@ -179,6 +183,19 @@ private extension TelemetryViewModel {
         }
         let alertLevel: AlertLevel = drone.isAltitudeGeofenceReached == true ? .warning : .none
         state.value.altitude.set(TelemetryValueModel(currentValue: altitude.rounded(toPlaces: Constants.altitudeDigitPrecision), alertLevel: alertLevel))
+    }
+    
+    /// Computes current AGL and updates TelemetryState accordingly.
+    func computeGroundRelativeAltitude() {
+        guard let drone = drone, drone.state.connectionState == .connected,
+              let groundRelativeAltitude = drone.getInstrument(Instruments.altimeter)?.groundRelativeAltitude,
+              !groundRelativeAltitude.isNaN
+        else {
+            state.value.groundRelativeAltitude.set(TelemetryValueModel(currentValue: nil, alertLevel: .none))
+            return
+        }
+        let alertLevel: AlertLevel = drone.isAltitudeGeofenceReached == true ? .warning : .none
+        state.value.groundRelativeAltitude.set(TelemetryValueModel(currentValue: groundRelativeAltitude.rounded(toPlaces: Constants.altitudeDigitPrecision), alertLevel: alertLevel))
     }
 
     /// Computes current distance and updates TelemetryState accordingly.

@@ -45,6 +45,7 @@ final class TelemetryBarViewController: UIViewController {
     // MARK: - Outlets
     @IBOutlet private weak var speedItemView: TelemetryItemView!
     @IBOutlet private weak var altitudeItemView: TelemetryItemView!
+    @IBOutlet private weak var aglItemView: TelemetryItemView!
     @IBOutlet private weak var distanceItemView: TelemetryItemView!
     @IBOutlet private weak var obstacleAvoidanceItemView: TelemetryItemView!
 
@@ -112,6 +113,10 @@ private extension TelemetryBarViewController {
                                                      label: defaultDistanceLabel,
                                                      backgroundColor: .clear,
                                                      borderColor: .clear)
+        aglItemView?.model = TelemetryItemModel(image: Asset.Telemetry.icAltitude.image,
+                                                     label: defaultDistanceLabel,
+                                                     backgroundColor: .clear,
+                                                     borderColor: .clear)
         distanceItemView?.model = TelemetryItemModel(image: Asset.Telemetry.icDistance.image,
                                                      label: defaultDistanceLabel,
                                                      backgroundColor: .clear,
@@ -128,6 +133,9 @@ private extension TelemetryBarViewController {
                                                 },
                                                 altitudeDidChange: { [weak self] altitude in
                                                     self?.onAltitudeChanged(altitude)
+                                                },
+                                                groundRelativeAltitudeDidChange: { [weak self] groundRelativeAltitude in
+                                                    self?.onGroundRelativeAltitudeChanged(groundRelativeAltitude)
                                                 },
                                                 distanceDidChange: { [weak self] distance in
                                                     self?.onDistanceChanged(distance)
@@ -182,6 +190,17 @@ private extension TelemetryBarViewController {
         }
 
         altitudeItemView.model?.backgroundColor = altitude.alertLevel.color
+    }
+    
+    /// Called when current altitude changes.
+    func onGroundRelativeAltitudeChanged(_ groundRelativeAltitude: TelemetryValueModel) {
+        if let groundRelativeAltitudeValue = groundRelativeAltitude.currentValue {
+            aglItemView?.model?.label = UnitHelper.stringDistanceWithDouble(groundRelativeAltitudeValue).uppercased()
+        } else {
+            aglItemView?.model?.label = defaultDistanceLabel
+        }
+
+        aglItemView.model?.backgroundColor = groundRelativeAltitude.alertLevel.color
     }
 
     /// Called when current distance changes.

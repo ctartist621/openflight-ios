@@ -76,7 +76,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         UIDevice.current.isBatteryMonitoringEnabled = true
         // ARCGIS KEY - Openflight
         AGSArcGISRuntimeEnvironment.apiKey =
-            "put your key here (https://developers.arcgis.com/)"
+            "foobar"
 
         // Enable gsdk system log
         ULog.redirectToSystemLog(enabled: true)
