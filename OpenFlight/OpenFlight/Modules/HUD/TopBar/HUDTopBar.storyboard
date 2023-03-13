@@ -144,7 +144,7 @@
                                         </constraints>
                                     </view>
                                     <view contentMode="scaleToFill" ambiguous="YES" placeholderIntrinsicWidth="50" placeholderIntrinsicHeight="40" translatesAutoresizingMaskIntoConstraints="NO" id="ShW-MJ-oyK" customClass="TelemetryItemView" customModule="OpenFlight" customModuleProvider="target">
-                                        <rect key="frame" x="4" y="0.0" width="46" height="40"/>
+                                        <rect key="frame" x="4" y="0.0" width="0.0" height="40"/>
                                         <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                                         <accessibility key="accessibilityConfiguration" identifier="droneSpeed">
                                             <bool key="isElement" value="YES"/>
@@ -153,8 +153,8 @@
                                             <action selector="speedItemTouchedUpInside:" destination="cxA-op-ycB" eventType="touchUpInside" id="wNv-eI-sNG"/>
                                         </connections>
                                     </view>
-                                    <view contentMode="scaleToFill" ambiguous="YES" placeholderIntrinsicWidth="50" placeholderIntrinsicHeight="40" translatesAutoresizingMaskIntoConstraints="NO" id="aDH-VF-Gop" customClass="TelemetryItemView" customModule="OpenFlight" customModuleProvider="target">
-                                        <rect key="frame" x="54" y="0.0" width="50" height="40"/>
+                                    <view contentMode="scaleToFill" ambiguous="YES" placeholderIntrinsicWidth="50" placeholderIntrinsicHeight="40" translatesAutoresizingMaskIntoConstraints="NO" id="aDH-VF-Gop" userLabel="Takeoff Relative Item View" customClass="TelemetryItemView" customModule="OpenFlight" customModuleProvider="target">
+                                        <rect key="frame" x="8" y="0.0" width="42" height="40"/>
                                         <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                                         <accessibility key="accessibilityConfiguration" identifier="droneAltitude">
                                             <bool key="isElement" value="YES"/>
@@ -163,14 +163,24 @@
                                             <action selector="altitudeItemTouchedUpInside:" destination="cxA-op-ycB" eventType="touchUpInside" id="GQm-zK-fNj"/>
                                         </connections>
                                     </view>
-                                    <view contentMode="scaleToFill" ambiguous="YES" placeholderIntrinsicWidth="50" placeholderIntrinsicHeight="40" translatesAutoresizingMaskIntoConstraints="NO" id="m1D-PA-69n" userLabel="AGL Item View" customClass="TelemetryItemView" customModule="OpenFlight" customModuleProvider="target">
-                                        <rect key="frame" x="108" y="0.0" width="50" height="40"/>
+                                    <view contentMode="scaleToFill" ambiguous="YES" placeholderIntrinsicWidth="50" placeholderIntrinsicHeight="40" translatesAutoresizingMaskIntoConstraints="NO" id="m1D-PA-69n" userLabel="Ground Relative Item View" customClass="TelemetryItemView" customModule="OpenFlight" customModuleProvider="target">
+                                        <rect key="frame" x="54" y="0.0" width="50" height="40"/>
                                         <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                                         <accessibility key="accessibilityConfiguration" identifier="droneAGL">
                                             <bool key="isElement" value="YES"/>
                                         </accessibility>
                                         <connections>
                                             <action selector="altitudeItemTouchedUpInside:" destination="cxA-op-ycB" eventType="touchUpInside" id="FRR-de-HbT"/>
+                                        </connections>
+                                    </view>
+                                    <view contentMode="scaleToFill" ambiguous="YES" placeholderIntrinsicWidth="50" placeholderIntrinsicHeight="40" translatesAutoresizingMaskIntoConstraints="NO" id="vI8-Hs-60B" userLabel="Absolute Altitude Item View" customClass="TelemetryItemView" customModule="OpenFlight" customModuleProvider="target">
+                                        <rect key="frame" x="108" y="0.0" width="50" height="40"/>
+                                        <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                                        <accessibility key="accessibilityConfiguration" identifier="droneAGL">
+                                            <bool key="isElement" value="YES"/>
+                                        </accessibility>
+                                        <connections>
+                                            <action selector="altitudeItemTouchedUpInside:" destination="cxA-op-ycB" eventType="touchUpInside" id="waN-2k-Mer"/>
                                         </connections>
                                     </view>
                                     <view contentMode="scaleToFill" ambiguous="YES" placeholderIntrinsicWidth="40" placeholderIntrinsicHeight="40" translatesAutoresizingMaskIntoConstraints="NO" id="QGj-5B-Yan" customClass="TelemetryItemView" customModule="OpenFlight" customModuleProvider="target">
@@ -207,11 +217,12 @@
                         </constraints>
                     </view>
                     <connections>
-                        <outlet property="aglItemView" destination="m1D-PA-69n" id="XgO-ce-2Bz"/>
-                        <outlet property="altitudeItemView" destination="aDH-VF-Gop" id="1Fq-kA-grA"/>
+                        <outlet property="absoluteAltitudeItemView" destination="vI8-Hs-60B" id="HQd-4V-liA"/>
                         <outlet property="distanceItemView" destination="QGj-5B-Yan" id="qP4-hn-bQo"/>
+                        <outlet property="groundRelativeAltitudeItemView" destination="m1D-PA-69n" id="Ru5-Ce-XEL"/>
                         <outlet property="obstacleAvoidanceItemView" destination="CXm-gG-DxE" id="pNy-NF-bE4"/>
                         <outlet property="speedItemView" destination="ShW-MJ-oyK" id="G5b-PJ-c7Q"/>
+                        <outlet property="takeoffRelativeAltitudeItemView" destination="aDH-VF-Gop" id="uqz-ja-EDi"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="f3o-89-fJL" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>

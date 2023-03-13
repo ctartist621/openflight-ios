@@ -43,10 +43,12 @@ final class TelemetryState: ViewModelState {
     // MARK: - Internal Properties
     /// Observable for current speed.
     fileprivate(set) var speed = Observable(TelemetryValueModel())
-    /// Observable for current altitude.
-    fileprivate(set) var altitude = Observable(TelemetryValueModel())
-    /// Observable for current altitude.
+    /// Observable for takeoff relative altitude.
+    fileprivate(set) var takeoffRelativeAltitude = Observable(TelemetryValueModel())
+    /// Observable for ground relative altitude (AGL).
     fileprivate(set) var groundRelativeAltitude = Observable(TelemetryValueModel())
+    /// Observable for absolute altitude.
+    fileprivate(set) var absoluteAltitude = Observable(TelemetryValueModel())
     /// Observable for current distance.
     fileprivate(set) var distance = Observable(TelemetryValueModel())
 }
@@ -99,13 +101,16 @@ final class TelemetryViewModel: DroneWatcherViewModel<TelemetryState> {
     ///    - distanceDidChange: called when distance changes
     init(userLocationManager: LocationManager,
          speedDidChange: ((TelemetryValueModel) -> Void)? = nil,
-         altitudeDidChange: ((TelemetryValueModel) -> Void)? = nil,
+         takeoffRelativeAltitudeDidChange: ((TelemetryValueModel) -> Void)? = nil,
          groundRelativeAltitudeDidChange: ((TelemetryValueModel) -> Void)? = nil,
+         absoluteAltitudeDidChange: ((TelemetryValueModel) -> Void)? = nil,
          distanceDidChange: ((TelemetryValueModel) -> Void)? = nil) {
         self.userLocationManager = userLocationManager
         super.init()
         state.value.speed.valueChanged = speedDidChange
-        state.value.altitude.valueChanged = altitudeDidChange
+        state.value.takeoffRelativeAltitude.valueChanged = takeoffRelativeAltitudeDidChange
+        state.value.groundRelativeAltitude.valueChanged = groundRelativeAltitudeDidChange
+        state.value.absoluteAltitude.valueChanged = absoluteAltitudeDidChange
         state.value.distance.valueChanged = distanceDidChange
         listenUserLocation()
     }
@@ -132,8 +137,8 @@ private extension TelemetryViewModel {
     func listenAltimeter(drone: Drone) {
         altimeterRef = drone.getInstrument(Instruments.altimeter) { [unowned self] _ in
             computeSpeed()
-            computeAltitude()
-            computeGroundRelativeAltitude()
+            computetakeoffRelativeAltitude()
+            computeAbsoluteAltitude()
         }
     }
 
@@ -147,7 +152,7 @@ private extension TelemetryViewModel {
     /// Starts watcher for geofence.
     func listenGeofence(drone: Drone) {
         geofenceRef = drone.getPeripheral(Peripherals.geofence) { [unowned self] _ in
-            computeAltitude()
+            computetakeoffRelativeAltitude()
             computeDistance()
         }
     }
@@ -173,16 +178,16 @@ private extension TelemetryViewModel {
     }
 
     /// Computes current altitude and updates TelemetryState accordingly.
-    func computeAltitude() {
+    func computetakeoffRelativeAltitude() {
         guard let drone = drone, drone.state.connectionState == .connected,
               let altitude = drone.getInstrument(Instruments.altimeter)?.takeoffRelativeAltitude,
               !altitude.isNaN
         else {
-            state.value.altitude.set(TelemetryValueModel(currentValue: nil, alertLevel: .none))
+            state.value.takeoffRelativeAltitude.set(TelemetryValueModel(currentValue: nil, alertLevel: .none))
             return
         }
         let alertLevel: AlertLevel = drone.isAltitudeGeofenceReached == true ? .warning : .none
-        state.value.altitude.set(TelemetryValueModel(currentValue: altitude.rounded(toPlaces: Constants.altitudeDigitPrecision), alertLevel: alertLevel))
+        state.value.takeoffRelativeAltitude.set(TelemetryValueModel(currentValue: altitude.rounded(toPlaces: Constants.altitudeDigitPrecision), alertLevel: alertLevel))
     }
     
     /// Computes current AGL and updates TelemetryState accordingly.
@@ -194,8 +199,38 @@ private extension TelemetryViewModel {
             state.value.groundRelativeAltitude.set(TelemetryValueModel(currentValue: nil, alertLevel: .none))
             return
         }
-        let alertLevel: AlertLevel = drone.isAltitudeGeofenceReached == true ? .warning : .none
+        
+        // Max FAA altitude is 400ft AGL
+        let maxGroundRelativeAltitude: Double
+        if UnitHelper.stringDistanceUnit() == "m" {
+            maxGroundRelativeAltitude = 121
+        } else {
+            maxGroundRelativeAltitude = 400
+        }
+            
+        let alertLevel: AlertLevel = (groundRelativeAltitude > maxGroundRelativeAltitude) == true ? .warning : .none
         state.value.groundRelativeAltitude.set(TelemetryValueModel(currentValue: groundRelativeAltitude.rounded(toPlaces: Constants.altitudeDigitPrecision), alertLevel: alertLevel))
+    }
+    
+    /// Computes current Absolute Altitude and updates TelemetryState accordingly.
+    func computeAbsoluteAltitude() {
+        guard let drone = drone, drone.state.connectionState == .connected,
+              let absoluteAltitude = drone.getInstrument(Instruments.altimeter)?.absoluteAltitude,
+              !absoluteAltitude.isNaN
+        else {
+            state.value.absoluteAltitude.set(TelemetryValueModel(currentValue: nil, alertLevel: .none))
+            return
+        }
+        // Max practical ceiling above sea level 5,000 m
+        let maxAbsoluteAltitude: Double
+        if UnitHelper.stringDistanceUnit() == "m" {
+            maxAbsoluteAltitude = 5000
+        } else {
+            maxAbsoluteAltitude = 16404
+        }
+
+        let alertLevel: AlertLevel = (absoluteAltitude > maxAbsoluteAltitude) == true ? .warning : .none
+        state.value.absoluteAltitude.set(TelemetryValueModel(currentValue: absoluteAltitude.rounded(toPlaces: Constants.altitudeDigitPrecision), alertLevel: alertLevel))
     }
 
     /// Computes current distance and updates TelemetryState accordingly.

@@ -44,8 +44,9 @@ protocol TelemetryBarViewControllerNavigation: AnyObject {
 final class TelemetryBarViewController: UIViewController {
     // MARK: - Outlets
     @IBOutlet private weak var speedItemView: TelemetryItemView!
-    @IBOutlet private weak var altitudeItemView: TelemetryItemView!
-    @IBOutlet private weak var aglItemView: TelemetryItemView!
+    @IBOutlet private weak var takeoffRelativeAltitudeItemView: TelemetryItemView!
+    @IBOutlet private weak var groundRelativeAltitudeItemView: TelemetryItemView!
+    @IBOutlet private weak var absoluteAltitudeItemView: TelemetryItemView!
     @IBOutlet private weak var distanceItemView: TelemetryItemView!
     @IBOutlet private weak var obstacleAvoidanceItemView: TelemetryItemView!
 
@@ -109,11 +110,15 @@ private extension TelemetryBarViewController {
                                                   label: defaultSpeedLabel,
                                                   backgroundColor: .clear,
                                                   borderColor: .clear)
-        altitudeItemView?.model = TelemetryItemModel(image: Asset.Telemetry.icAltitude.image,
+        takeoffRelativeAltitudeItemView?.model = TelemetryItemModel(image: Asset.Telemetry.icAltitude.image,
                                                      label: defaultDistanceLabel,
                                                      backgroundColor: .clear,
                                                      borderColor: .clear)
-        aglItemView?.model = TelemetryItemModel(image: Asset.Telemetry.icAltitude.image,
+        groundRelativeAltitudeItemView?.model = TelemetryItemModel(image: Asset.Telemetry.icAltitude.image,
+                                                     label: defaultDistanceLabel,
+                                                     backgroundColor: .clear,
+                                                     borderColor: .clear)
+        absoluteAltitudeItemView?.model = TelemetryItemModel(image: Asset.Telemetry.icAltitude.image,
                                                      label: defaultDistanceLabel,
                                                      backgroundColor: .clear,
                                                      borderColor: .clear)
@@ -131,11 +136,14 @@ private extension TelemetryBarViewController {
                                                 speedDidChange: { [weak self] speed in
                                                     self?.onSpeedChanged(speed)
                                                 },
-                                                altitudeDidChange: { [weak self] altitude in
-                                                    self?.onAltitudeChanged(altitude)
+                                                takeoffRelativeAltitudeDidChange: { [weak self] takeoffRelativeAltitude in
+                                                    self?.onTakeoffRelativeAltitudeChanged(takeoffRelativeAltitude)
                                                 },
                                                 groundRelativeAltitudeDidChange: { [weak self] groundRelativeAltitude in
                                                     self?.onGroundRelativeAltitudeChanged(groundRelativeAltitude)
+                                                },
+                                                absoluteAltitudeDidChange: { [weak self] absoluteAltitude in
+                                                    self?.onAbsoluteAltitudeChanged(absoluteAltitude)
                                                 },
                                                 distanceDidChange: { [weak self] distance in
                                                     self?.onDistanceChanged(distance)
@@ -182,25 +190,36 @@ private extension TelemetryBarViewController {
     }
 
     /// Called when current altitude changes.
-    func onAltitudeChanged(_ altitude: TelemetryValueModel) {
-        if let altitudeValue = altitude.currentValue {
-            altitudeItemView?.model?.label = UnitHelper.stringDistanceWithDouble(altitudeValue).uppercased()
+    func onTakeoffRelativeAltitudeChanged(_ takeoffRelativeAltitude: TelemetryValueModel) {
+        if let takeoffRelativeAltitudeValue = takeoffRelativeAltitude.currentValue {
+            takeoffRelativeAltitudeItemView?.model?.label = UnitHelper.stringDistanceWithDouble(takeoffRelativeAltitudeValue).uppercased()
         } else {
-            altitudeItemView?.model?.label = defaultDistanceLabel
+            takeoffRelativeAltitudeItemView?.model?.label = defaultDistanceLabel
         }
 
-        altitudeItemView.model?.backgroundColor = altitude.alertLevel.color
+        takeoffRelativeAltitudeItemView.model?.backgroundColor = takeoffRelativeAltitude.alertLevel.color
     }
     
     /// Called when current altitude changes.
     func onGroundRelativeAltitudeChanged(_ groundRelativeAltitude: TelemetryValueModel) {
         if let groundRelativeAltitudeValue = groundRelativeAltitude.currentValue {
-            aglItemView?.model?.label = UnitHelper.stringDistanceWithDouble(groundRelativeAltitudeValue).uppercased()
+            groundRelativeAltitudeItemView?.model?.label = UnitHelper.stringDistanceWithDouble(groundRelativeAltitudeValue).uppercased()
         } else {
-            aglItemView?.model?.label = defaultDistanceLabel
+            groundRelativeAltitudeItemView?.model?.label = defaultDistanceLabel
         }
 
-        aglItemView.model?.backgroundColor = groundRelativeAltitude.alertLevel.color
+        groundRelativeAltitudeItemView.model?.backgroundColor = groundRelativeAltitude.alertLevel.color
+    }
+    
+    /// Called when current altitude changes.
+    func onAbsoluteAltitudeChanged(_ absoluteAltitude: TelemetryValueModel) {
+        if let absoluteAltitudeValue = absoluteAltitude.currentValue {
+            absoluteAltitudeItemView?.model?.label = UnitHelper.stringDistanceWithDouble(absoluteAltitudeValue).uppercased()
+        } else {
+            absoluteAltitudeItemView?.model?.label = defaultDistanceLabel
+        }
+
+        absoluteAltitudeItemView.model?.backgroundColor = absoluteAltitude.alertLevel.color
     }
 
     /// Called when current distance changes.
